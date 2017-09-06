@@ -1,11 +1,10 @@
 package com.emax.map_lib;
 
 import android.location.Address;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.FrameLayout;
 
-import com.amap.api.maps.model.MyLocationStyle;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 public class TestActivity extends AppCompatActivity implements MapFactory.OnMapMoveListener {
@@ -26,7 +25,6 @@ public class TestActivity extends AppCompatActivity implements MapFactory.OnMapM
                 .setAllGesturesEnabled(true)
                 .setCompassEnabled(true)
                 .setShowMyLocation(true)
-                .setMyLocationStyle(MyLocationStyle.LOCATION_TYPE_MAP_ROTATE_NO_CENTER)
                 .setRotateGesturesEnabled(true)
                 .setScrollGesturesEnabled(true)
                 .setTiltGesturesEnabled(true)
@@ -34,6 +32,7 @@ public class TestActivity extends AppCompatActivity implements MapFactory.OnMapM
                 .setIndoorLevelPickerEnabled(true)
                 .setMapToolbarEnabled(true)
                 .setZoomControlsEnabled(true)
+                .setContinuousLocation(false)
                 .build();
 
     }

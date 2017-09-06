@@ -4,16 +4,20 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.view.View;
 
-import com.amap.api.maps.model.MyLocationStyle;
-
 /**
  * Created by 90835 on 2017/9/5.
  */
 
 public class MapBuilder implements Builder {
 
+    /*
+    * 地图样式
+    * */
     public static final int MAP_NOMARL = 1;
     public static final int MAP_SATELLITE = 2;
+
+
+    private Boolean isContinuousLocation = false;
     private Boolean isZoomControls = false;
     private Boolean isZoomGestures = false;
     private Boolean isScrollGestures = true;
@@ -24,14 +28,13 @@ public class MapBuilder implements Builder {
     private Boolean isCompassEnabled = false;
     private Boolean isMapToolBar = false;
     private Boolean isIndoor = false;
-    private MyLocationStyle myLocationStyle;
     private int icon;
     private View mapRootView;
     private Context context;
     private FragmentManager manager;
-    private int mapType=MAP_NOMARL;
-    private Boolean isMoveAnimateCamera=false;
-    private float level=16;
+    private int mapType = MAP_NOMARL;
+    private Boolean isMoveAnimateCamera = false;
+    private float level = 16;
 
     public MapBuilder(Context context) {
         this.context = context;
@@ -118,18 +121,6 @@ public class MapBuilder implements Builder {
     }
 
     @Override
-    public MapBuilder setMyLocationStyle(int type) {
-        myLocationStyle = new MyLocationStyle();
-        myLocationStyle.interval(2000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
-        myLocationStyle.myLocationType(type);
-        return this;
-    }
-
-    public MyLocationStyle getMyLocationStyle() {
-        return myLocationStyle;
-    }
-
-    @Override
     public MapBuilder setCompassEnabled(Boolean isCompassEnabled) {
         this.isCompassEnabled = isCompassEnabled;
         return this;
@@ -137,26 +128,36 @@ public class MapBuilder implements Builder {
 
     @Override
     public MapBuilder setMapType(int mapType) {
-        this.mapType=mapType;
+        this.mapType = mapType;
         return this;
     }
 
     @Override
     public MapBuilder setMoveAnimateCamera(Boolean isMoveAnimateCamera) {
-        this.isMoveAnimateCamera=isMoveAnimateCamera;
+        this.isMoveAnimateCamera = isMoveAnimateCamera;
         return this;
     }
 
     @Override
     public MapBuilder setZoomLevel(float level) {
-        this.level=level;
+        this.level = level;
         return this;
     }
 
     @Override
     public MapBuilder setZoomControlsEnabled(Boolean isZoomControls) {
-        this.isZoomControls=isZoomControls;
+        this.isZoomControls = isZoomControls;
         return this;
+    }
+
+    @Override
+    public MapBuilder setContinuousLocation(Boolean isContinuousLocation) {
+        this.isContinuousLocation = isContinuousLocation;
+        return this;
+    }
+
+    public Boolean getContinuousLocation() {
+        return isContinuousLocation;
     }
 
     public float getLevel() {

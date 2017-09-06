@@ -69,7 +69,6 @@ public class MapFactory implements AMapLocationListener {
     }
 
     public IMapManager getMapManager() {
-        isInChina=false;
         if (!isInChina) {
             mapManager = new LocationGoogleMapManage(mapBuilder, onMapMoveListener);
         } else {

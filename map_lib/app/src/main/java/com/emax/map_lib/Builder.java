@@ -11,6 +11,7 @@ public interface Builder {
 
 
     MapBuilder setFragmentManage(FragmentManager manager);
+
     MapBuilder setMapView(View view);
 
 
@@ -56,13 +57,12 @@ public interface Builder {
     *
     * */
     MapBuilder setIndoorLevelPickerEnabled(Boolean isIndoor);
+
     /*
     * 地图工具   *
     * */
     MapBuilder setMapToolbarEnabled(Boolean isMapToolBar);
 
-
-    MapBuilder setMyLocationStyle(int Type);
     /*
     * 罗盘显示
     * */
@@ -78,6 +78,7 @@ public interface Builder {
     * None：无图块。 地图将渲染为空网格，不加载任何图块。（）
     * */
     MapBuilder setMapType(int mapType);
+
     /*
     * 动画摄像移动
     * */
@@ -92,4 +93,9 @@ public interface Builder {
     * 缩放控件
     * */
     MapBuilder setZoomControlsEnabled(Boolean isZonmControls);
+
+    /*
+    * 是否连续定位:true:不断的定位，将镜头始终以我的位置为中心，false：初始化时移动到我的位置，可以随意移动镜头
+    * */
+    MapBuilder setContinuousLocation(Boolean isContinuousLocation);
 }
