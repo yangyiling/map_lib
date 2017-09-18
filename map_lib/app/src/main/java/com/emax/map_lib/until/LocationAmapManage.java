@@ -1,4 +1,4 @@
-package com.emax.map_lib;
+package com.emax.map_lib.until;
 
 import android.content.Context;
 import android.location.Address;
@@ -18,12 +18,21 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
+import com.emax.map_lib.R;
+import com.emax.map_lib.bean.AddressData;
+import com.emax.map_lib.event.IMapManager;
+import com.emax.map_lib.event.MoveMapEvent;
 
 /**
  * Created by 90835 on 2017/8/25.
  */
 
-public class LocationAmapManage implements IMapManager, AMapLocationListener, AMap.OnCameraChangeListener {
+public class LocationAmapManage implements IMapManager, AMapLocationListener, AMap.OnCameraChangeListener, GeocodeSearch.OnGeocodeSearchListener {
     private Context context;
     private FrameLayout mapParent;
     private MapFragment mapFragment;
@@ -38,19 +47,20 @@ public class LocationAmapManage implements IMapManager, AMapLocationListener, AM
     public AMapLocationClientOption mLocationOption = null;
     private String city;
     private double lat, lng;
-    private MapFactory.OnMapMoveListener listener;
+    private MoveMapEvent listener;
     private Address moveAddress;
     private AMapLocation aMapLocation;
-    private LatLngData latLngData;
+    private AddressData addressData;
     private MapBuilder builder;
     private Boolean isContinuousLocation = true;
     private MyLocationStyle myLocationStyle;
+    private GeocodeSearch geocodeSearch;
+    private RegeocodeQuery query;
 
 
-    public LocationAmapManage(MapBuilder builder,
-                              MapFactory.OnMapMoveListener onMapMoveListener) {
+    public LocationAmapManage(MapBuilder builder) {
         this.context = builder.getContext();
-        this.listener = onMapMoveListener;
+        this.listener = builder.getListener();
         this.builder = builder;
         mapParent = (FrameLayout) builder.getMapRootView().findViewById(R.id.map_container);
         LayoutInflater.from(context).inflate(R.layout.fragment_gmap, mapParent);
@@ -59,8 +69,6 @@ public class LocationAmapManage implements IMapManager, AMapLocationListener, AM
             aMap = mapFragment.getMap();
         }
         initMap();
-
-
     }
 
     private void initMap() {
@@ -80,6 +88,8 @@ public class LocationAmapManage implements IMapManager, AMapLocationListener, AM
         mLocationClient.setLocationListener(this);
         //启动定位
         mLocationClient.startLocation();
+        geocodeSearch = new GeocodeSearch(context);
+        geocodeSearch.setOnGeocodeSearchListener(this);
     }
 
     private void initSetting() {
@@ -104,12 +114,25 @@ public class LocationAmapManage implements IMapManager, AMapLocationListener, AM
     }
 
     private void show() {
-//        ToastUtil.show("定位数据：city==" + myAddress.getLocality() + "坐标为：lat==" + lat + "\t\tlng==" + lng, context);
         if (aMap != null) {
             final LatLng latLng = new LatLng(lat, lng);
-            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+            if (builder.getMoveAnimateCamera()) {
+                //设置希望展示的地图缩放级别
+                aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17), 2000, new AMap.CancelableCallback() {
+                    @Override
+                    public void onFinish() {
+
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+            } else {
+                aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+            }
         } else {
-//            ToastUtil.show("测试结果：aMap为空", context);
         }
 
     }
@@ -161,7 +184,32 @@ public class LocationAmapManage implements IMapManager, AMapLocationListener, AM
     public void onCameraChangeFinish(CameraPosition cameraPosition) {
         Double lat = cameraPosition.target.latitude;
         Double lng = cameraPosition.target.longitude;
-        latLngData = new LatLngData(lat, lng);
-        listener.step(latLngData);
+//        latLngData = new LatLngData(lat, lng);
+//        listener.stop(latLngData);
+        // 第一个参数表示一个Latlng，第二参数表示范围多少米，第三个参数表示是火系坐标系还是GPS原生坐标系
+        LatLonPoint latLonPoint = new LatLonPoint(lat, lng);
+        RegeocodeQuery query = new RegeocodeQuery(latLonPoint, 10, GeocodeSearch.AMAP);
+        geocodeSearch.getFromLocationAsyn(query);
+    }
+
+    /*逆地址解析*/
+    @Override
+    public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int i) {
+        LogUtils.a("解析-++++++++++++++：", regeocodeResult.getRegeocodeQuery());
+        addressData = new AddressData();
+        addressData.setAddressDetail(regeocodeResult.getRegeocodeAddress().getFormatAddress());
+        addressData.setCity(regeocodeResult.getRegeocodeAddress().getCity());
+        addressData.setArea(regeocodeResult.getRegeocodeAddress().getDistrict());
+        addressData.setProvincial(regeocodeResult.getRegeocodeAddress().getProvince());
+        addressData.setTown(regeocodeResult.getRegeocodeAddress().getTownship());
+        addressData.setPostcode(regeocodeResult.getRegeocodeAddress().getCityCode());
+        addressData.setLatitude(regeocodeResult.getRegeocodeQuery().getPoint().getLatitude());
+        addressData.setLongitude(regeocodeResult.getRegeocodeQuery().getPoint().getLongitude());
+        listener.stop(addressData);
+    }
+
+    @Override
+    public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
+        LogUtils.a("解析-++++++++++++++：", geocodeResult.getGeocodeQuery());
     }
 }

@@ -1,7 +1,9 @@
-package com.emax.map_lib;
+package com.emax.map_lib.event;
 
 import android.app.FragmentManager;
 import android.view.View;
+
+import com.emax.map_lib.until.MapBuilder;
 
 /**
  * Created by 90835 on 2017/9/5.
@@ -98,4 +100,9 @@ public interface Builder {
     * 是否连续定位:true:不断的定位，将镜头始终以我的位置为中心，false：初始化时移动到我的位置，可以随意移动镜头
     * */
     MapBuilder setContinuousLocation(Boolean isContinuousLocation);
+
+    /*
+    * 移动时监听
+    * */
+    MapBuilder setMoveListener(MoveMapEvent listener);
 }

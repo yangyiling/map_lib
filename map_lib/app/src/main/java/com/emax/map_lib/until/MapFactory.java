@@ -1,15 +1,15 @@
-package com.emax.map_lib;
+package com.emax.map_lib.until;
 
-import android.app.Activity;
-import android.location.Address;
 import android.Manifest;
+import android.app.Activity;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.CoordinateConverter;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.emax.map_lib.event.IMapManager;
+import com.emax.map_lib.event.MoveMapEvent;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 /**
@@ -22,7 +22,7 @@ public class MapFactory implements AMapLocationListener {
     private AMapLocationClientOption mLocationOption = null;
     private AMapLocationClient mLocationClient;
     private IMapManager mapManager;
-    private OnMapMoveListener onMapMoveListener;
+    private MoveMapEvent onMapMoveListener;
     private boolean isInChina = false;
 
     private MapBuilder mapBuilder;
@@ -69,10 +69,11 @@ public class MapFactory implements AMapLocationListener {
     }
 
     public IMapManager getMapManager() {
+        isInChina=false;
         if (!isInChina) {
-            mapManager = new LocationGoogleMapManage(mapBuilder, onMapMoveListener);
+            mapManager = new LocationGoogleMapManage(mapBuilder);
         } else {
-            mapManager = new LocationAmapManage(mapBuilder, onMapMoveListener);
+            mapManager = new LocationAmapManage(mapBuilder);
         }
         return mapManager;
     }
@@ -84,16 +85,5 @@ public class MapFactory implements AMapLocationListener {
 
     }
 
-    public interface OnMapMoveListener {
-        void move();
 
-        void step(LatLngData latLngData);
-
-        void setMoveAddress(Address moveAddress);
-
-        void initGoogleApi(GoogleApiClient googleApiClient);
-
-        void mapManager(IMapManager mapManager, boolean isInChina);
-
-    }
 }

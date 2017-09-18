@@ -1,13 +1,16 @@
 package com.emax.map_lib;
 
-import android.location.Address;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.FrameLayout;
 
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.emax.map_lib.bean.AddressData;
+import com.emax.map_lib.event.MoveMapEvent;
+import com.emax.map_lib.until.LogUtils;
+import com.emax.map_lib.until.MapBuilder;
+import com.emax.map_lib.until.MapFactory;
 
-public class TestActivity extends AppCompatActivity implements MapFactory.OnMapMoveListener {
+public class TestActivity extends AppCompatActivity implements MoveMapEvent {
 
     private FrameLayout mapContainer;
     private MapFactory mapFactory;
@@ -28,11 +31,12 @@ public class TestActivity extends AppCompatActivity implements MapFactory.OnMapM
                 .setRotateGesturesEnabled(true)
                 .setScrollGesturesEnabled(true)
                 .setTiltGesturesEnabled(true)
-                .setMoveAnimateCamera(false)
+                .setMoveAnimateCamera(true)
                 .setIndoorLevelPickerEnabled(true)
                 .setMapToolbarEnabled(true)
                 .setZoomControlsEnabled(true)
                 .setContinuousLocation(false)
+                .setMoveListener(this)
                 .build();
 
     }
@@ -43,22 +47,7 @@ public class TestActivity extends AppCompatActivity implements MapFactory.OnMapM
     }
 
     @Override
-    public void step(LatLngData latLngData) {
-
-    }
-
-    @Override
-    public void setMoveAddress(Address moveAddress) {
-
-    }
-
-    @Override
-    public void initGoogleApi(GoogleApiClient googleApiClient) {
-
-    }
-
-    @Override
-    public void mapManager(IMapManager mapManager, boolean isInChina) {
-
+    public void stop(AddressData addressData) {
+        LogUtils.e("是急急急急急急急急急急急急急急急急急急:", addressData);
     }
 }

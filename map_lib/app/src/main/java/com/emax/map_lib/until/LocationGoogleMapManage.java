@@ -1,4 +1,4 @@
-package com.emax.map_lib;
+package com.emax.map_lib.until;
 
 import android.content.Context;
 import android.location.Address;
@@ -13,6 +13,10 @@ import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.emax.map_lib.R;
+import com.emax.map_lib.bean.AddressData;
+import com.emax.map_lib.event.IMapManager;
+import com.emax.map_lib.event.MoveMapEvent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -35,6 +39,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import rx.Observable;
+import rx.Observer;
+import rx.schedulers.Schedulers;
+
 /**
  * Created by 90835 on 2017/8/9.
  */
@@ -55,12 +63,14 @@ public class LocationGoogleMapManage implements OnMapReadyCallback, GoogleMap.On
     private LocationRequest mLocationRequest;
     private Address myAddress;
     private Address moveAddress;
-    private LatLngData latLngData;
+    private AddressData addressData;
     private MapBuilder builder;
+    private MoveMapEvent listener;
 
-    public LocationGoogleMapManage(MapBuilder builder, MapFactory.OnMapMoveListener listener) {
+    public LocationGoogleMapManage(MapBuilder builder) {
         this.context = builder.getContext();
         this.builder = builder;
+        this.listener = builder.getListener();
         mapParent = (FrameLayout) builder.getMapRootView().findViewById(R.id.map_container);
         LayoutInflater.from(context).inflate(R.layout.fragment_googlemap, mapParent);
         MapFragment mapFragment = (MapFragment) builder.getManager()
@@ -195,7 +205,37 @@ public class LocationGoogleMapManage implements OnMapReadyCallback, GoogleMap.On
     public void onCameraIdle() {
         Double lat = mGoogleMap.getCameraPosition().target.latitude;
         Double lng = mGoogleMap.getCameraPosition().target.longitude;
-        latLngData = new LatLngData(lat, lng);
+        addressData = new AddressData();
+        addressData.setLatitude(lat);
+        addressData.setLongitude(lng);
+        Observable.just(addressData)
+                .subscribeOn(Schedulers.io())
+                .map(addressData -> getAddressDetail(addressData.getLatitude(), addressData.getLongitude())).subscribe(new Observer<Address>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                LogUtils.a("坐标解析错误:", e.getMessage());
+            }
+
+            @Override
+            public void onNext(Address address) {
+                if (address != null) {
+                    addressData.setProvincial(address.getAdminArea());
+                    addressData.setCity(address.getLocality());
+                    addressData.setAddressDetail(address.getAddressLine(0));
+                    addressData.setArea(address.getAdminArea());
+                    addressData.setPostcode(address.getPostalCode());
+                    addressData.setTown(address.getSubLocality());
+                    listener.stop(addressData);
+                }
+            }
+        });
+
+//
     }
 
     /*
@@ -203,10 +243,14 @@ public class LocationGoogleMapManage implements OnMapReadyCallback, GoogleMap.On
     * 根据坐标解析地址
     * */
     public Address getAddressDetail(Double lat, Double lng) {
-        Geocoder geocoder = new Geocoder(context, Locale.ENGLISH);
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             final List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            return addresses.get(0);
+            if (addresses.size() > 0) {
+                return addresses.get(0);
+            } else {
+                return null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

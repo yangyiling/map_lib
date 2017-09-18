@@ -1,4 +1,4 @@
-package com.emax.map_lib;
+package com.emax.map_lib.event;
 
 import android.os.Bundle;
 

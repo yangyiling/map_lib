@@ -1,8 +1,11 @@
-package com.emax.map_lib;
+package com.emax.map_lib.until;
 
 import android.app.FragmentManager;
 import android.content.Context;
 import android.view.View;
+
+import com.emax.map_lib.event.Builder;
+import com.emax.map_lib.event.MoveMapEvent;
 
 /**
  * Created by 90835 on 2017/9/5.
@@ -28,6 +31,7 @@ public class MapBuilder implements Builder {
     private Boolean isCompassEnabled = false;
     private Boolean isMapToolBar = false;
     private Boolean isIndoor = false;
+    private MoveMapEvent listener;
     private int icon;
     private View mapRootView;
     private Context context;
@@ -154,6 +158,16 @@ public class MapBuilder implements Builder {
     public MapBuilder setContinuousLocation(Boolean isContinuousLocation) {
         this.isContinuousLocation = isContinuousLocation;
         return this;
+    }
+
+    @Override
+    public MapBuilder setMoveListener(MoveMapEvent listener) {
+        this.listener=listener;
+        return this;
+    }
+
+    public MoveMapEvent getListener() {
+        return listener;
     }
 
     public Boolean getContinuousLocation() {
